@@ -11,7 +11,9 @@
 class server
 {
 private:
-    const int backlog = 5;
+    const int BACKLOG = 5;
+    const int MAX_RECV_BUFFER_SIZE = 4096;
+
     int serverSocket;
     struct addrinfo hints;
     struct addrinfo *serverInformation;
