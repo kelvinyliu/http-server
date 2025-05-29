@@ -6,8 +6,9 @@ server::server(const uint16_t PORT) {
     this->hints.ai_socktype = SOCK_STREAM; // TCP
     this->hints.ai_flags = AI_PASSIVE;
 
-    // set the port to the param, 8080 to test for now
-    int status = getaddrinfo(NULL, "8080", &this->hints, &this->serverInformation);
+    std::string portString = std::to_string(PORT);
+    // set the port to the param
+    int status = getaddrinfo(NULL, portString.c_str(), &this->hints, &this->serverInformation);
     if (status != 0) {
         std::cout << "addrinfo init fail." << std::endl;
         exit(1);
