@@ -7,7 +7,7 @@ server::server(const uint16_t PORT) {
     this->hints.ai_flags = AI_PASSIVE;
 
     std::string portString = std::to_string(PORT);
-    // set the port to the param
+    // set the port to the param, 8080 to test for now
     int status = getaddrinfo(NULL, portString.c_str(), &this->hints, &this->serverInformation);
     if (status != 0) {
         std::cout << "addrinfo init fail." << std::endl;
@@ -34,7 +34,7 @@ void server::initSocket() {
         exit(1);
     }
 
-    listen(this->serverSocket, this->backlog);
+    listen(this->serverSocket, this->BACKLOG);
 }
 
 void server::startAccepting() {
@@ -47,10 +47,20 @@ void server::startAccepting() {
     inet_ntop(AF_INET, &clientAddr.sin_addr, clientIp, INET_ADDRSTRLEN);
     std::cout << clientIp << std::endl;
 
-    const char* msg = "Hello, world!";
-    int len = strlen(msg);
-    int bytesSent = 0;
-    bytesSent = send(clientSocket, msg, len, 0);
+    // const char* msg = "Hello, world!";
+    // int len = strlen(msg);
+    // int bytesSent = 0;
+    // bytesSent = send(clientSocket, msg, len, 0);
+
+    char receivedText[MAX_RECV_BUFFER_SIZE];
+
+    int recvBytes = recv(clientSocket, receivedText, MAX_RECV_BUFFER_SIZE-1, 0);
+    if (recvBytes == -1) {
+        std::cout << "Error receiving data from client" << std::endl;
+        exit(1);
+    }
+
+    std::cout << receivedText << std::endl;
+    std::cout << strlen(receivedText) << std::endl;
     
-    std::cout << "Bytes sent: " << bytesSent << std::endl;
 }
