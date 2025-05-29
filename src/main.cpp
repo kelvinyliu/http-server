@@ -1,6 +1,11 @@
+#include "../include/server.hpp"
 #include <iostream>
 
-int main() {
-    std::cout << "Hello, world." << std::endl;
+int main()
+{
+    server s(8080);
+    s.initSocket();
+    s.startAccepting();
+    
     return 0;
 }
