@@ -1,4 +1,5 @@
 #pragma once
+#include "httpRequest.hpp"
 #include <cstdint>
 #include <netdb.h>
 #include <cstddef>
@@ -21,7 +22,7 @@ private:
     struct addrinfo *serverInformation;
 
     void parseHTTPRequest(char* recvText, int reqSocket);
-    void serveGetRequest(const std::string& reqPath, int reqSocket);
+    void serveGetRequest(const httpRequest& req, int reqSocket);
 
 public:
     server(const uint16_t PORT);

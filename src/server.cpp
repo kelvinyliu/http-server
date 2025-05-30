@@ -94,18 +94,22 @@ void server::parseHTTPRequest(char* receivedText, int reqSocket) {
         respond appropriately with correct headers and html content
     */
     if (reqMethod == RequestMethodType::GET) {
-        this->serveGetRequest(reqPath, reqSocket);
+        this->serveGetRequest(req, reqSocket);
     }
 }
 
-void server::serveGetRequest(const std::string& reqPath, int reqSocket) {
+void server::serveGetRequest(const httpRequest& req, int reqSocket) {
     std::string filePath = "htdocs/";
+    const std::string reqPath = req.getRequestPath();
+
     // serve correct file, '/' is going to refer to index.html
     if (reqPath == "/") {
         filePath.append("index.html");
     } else {
         filePath.append(reqPath);
     }
+
+    std::map<std::string, std::string> queries = req.getQueries();
 
     std::ifstream requestedFile(filePath, std::ios::binary);
     if (!requestedFile.is_open()) {
@@ -134,5 +138,5 @@ void server::serveGetRequest(const std::string& reqPath, int reqSocket) {
 
     std::string response = responseStream.str();
     send(reqSocket, response.c_str(), response.size(), 0);
-
 }
+
