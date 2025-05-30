@@ -28,8 +28,15 @@ void server::initSocket() {
         std::cout << "sock init failed." << std::endl;
         exit(1);
     }
-    this->serverSocket = _sock;
 
+    int opt = 1;
+    if (setsockopt(_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
+        std::cout << "Error in reusing." << std::endl;
+        this->~server();
+        exit(1);
+    }
+
+    this->serverSocket = _sock;
     int status = bind(this->serverSocket, this->serverInformation->ai_addr, this->serverInformation->ai_addrlen);
     if (status != 0) {
         std::cout << "sock bind fail." << std::endl;
