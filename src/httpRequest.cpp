@@ -32,17 +32,19 @@ httpRequest::httpRequest(const std::string req) {
         }
 
         std::string key = line.substr(0, colonIndex);
-        std::string val = line.substr(colonIndex+1, line.size());
+        std::string val = line.substr(colonIndex+1);
 
         this->reqHeaders[key] = val;
     }
+
+    this->resolveRequestQueries(this->reqPath);
 
     std::cout << this->reqMethod << std::endl;
     std::cout << this->reqPath << std::endl;
     std::cout << this->reqVersion << std::endl;
 }
 
-enum RequestMethodType httpRequest::getRequestMethod() {
+enum RequestMethodType httpRequest::getRequestMethod() const {
     if (this->reqMethod == "GET") {
         return RequestMethodType::GET;
     } else if (this->reqMethod == "POST") {
@@ -52,8 +54,40 @@ enum RequestMethodType httpRequest::getRequestMethod() {
     return RequestMethodType::ERROR;
 }
 
-const std::string& httpRequest::getRequestPath() {
+const std::string& httpRequest::getRequestPath() const {
     return this->reqPath;
+}
+
+void httpRequest::resolveRequestQueries(std::string req) {
+    std::map<std::string, std::string> reqQueries;
+
+    size_t queryIndex = req.find('?');
+    if (queryIndex == std::string::npos) {
+        this->reqQueries = reqQueries;
+    };
+    std::string filePath = req.substr(0, queryIndex);
+    this->reqPath = filePath;
+
+    std::string queries = req.substr(queryIndex+1);
+
+    std::istringstream queryStream(queries);
+    std::string kv;
+    while (std::getline(queryStream, kv, '&')) {
+        size_t equalIndex = kv.find('=');
+        if (equalIndex == std::string::npos) {
+            // Cannot find equal in kv pair?
+            continue;
+        }
+        std::string key = kv.substr(0, equalIndex);
+        std::string val = kv.substr(equalIndex+1);
+
+        reqQueries[key] = val;
+    }
+    this->reqQueries = reqQueries;
+}
+
+const std::map<std::string, std::string> httpRequest::getQueries() const {
+    return this->reqQueries;
 }
 
 httpRequest::~httpRequest() {
