@@ -75,12 +75,24 @@ void server::startAccepting() {
     
 }
 
+void server::serve404Page(int reqSocket) {
+    std::string notFound =
+        "HTTP/1.1 404 Not Found\r\n"
+        "Content-Type: text/html\r\n"
+        "Content-Length: 13\r\n"
+        "\r\n"
+        "404 Not Found";
+
+    send(reqSocket, notFound.c_str(), notFound.size(), 0);
+}
+
 void server::parseHTTPRequest(char* receivedText, int reqSocket) {
     std::string recv(receivedText);
     httpRequest req(recv);
 
     enum RequestMethodType reqMethod = req.getRequestMethod();
     std::string reqPath = req.getRequestPath();
+    const std::map<std::string, std::string>& reqHeaders = req.getRequestHeaders();
 
     /*
         Handle serving server files,
@@ -93,6 +105,12 @@ void server::parseHTTPRequest(char* receivedText, int reqSocket) {
         check for existence of path ->
         respond appropriately with correct headers and html content
     */
+
+    if (reqHeaders.find("Host") == reqHeaders.end()) {
+        this->serve404Page(reqSocket);
+        return;
+    }
+
     if (reqMethod == RequestMethodType::GET) {
         this->serveGetRequest(req, reqSocket);
     }
@@ -115,14 +133,7 @@ void server::serveGetRequest(const httpRequest& req, int reqSocket) {
     if (!requestedFile.is_open()) {
         // return an error page, for now just exit program and error
         std::cout << filePath << std::endl;
-        std::string notFound =
-            "HTTP/1.1 404 Not Found\r\n"
-            "Content-Type: text/html\r\n"
-            "Content-Length: 13\r\n"
-            "\r\n"
-            "404 Not Found";
-
-        send(reqSocket, notFound.c_str(), notFound.size(), 0);
+        this->serve404Page(reqSocket);
         return;
     }
     std::ostringstream bodyStream;
@@ -133,6 +144,7 @@ void server::serveGetRequest(const httpRequest& req, int reqSocket) {
     responseStream << "HTTP/1.1 200 OK" << "\r\n";
     responseStream << "Content-Length: " << body.size() << "\r\n";
     responseStream << "Content-Type: " << getMIMEType(filePath) << "\r\n";
+    responseStream << "Connection: close" << "\r\n";
     responseStream << "\r\n";
     responseStream << body;
 
