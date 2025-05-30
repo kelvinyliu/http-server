@@ -56,7 +56,7 @@ void server::startAccepting() {
 
         char clientIp[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &clientAddr.sin_addr, clientIp, INET_ADDRSTRLEN);
-        std::cout << "----- Received data from: \n" << clientIp << std::endl;
+        std::cout << "----- Received data from: " << clientIp << std::endl;
 
         char receivedText[MAX_RECV_BUFFER_SIZE];
 

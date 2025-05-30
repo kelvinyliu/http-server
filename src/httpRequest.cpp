@@ -39,9 +39,9 @@ httpRequest::httpRequest(const std::string req) {
 
     this->resolveRequestQueries(this->reqPath);
 
-    std::cout << this->reqMethod << std::endl;
-    std::cout << this->reqPath << std::endl;
-    std::cout << this->reqVersion << std::endl;
+    std::cout << "Request Method:  " << this->reqMethod << std::endl;
+    std::cout << "Request Path:    " << this->reqPath << std::endl;
+    std::cout << "Request Version: " << this->reqVersion << std::endl;
 }
 
 enum RequestMethodType httpRequest::getRequestMethod() const {
