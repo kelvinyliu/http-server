@@ -1,4 +1,5 @@
 #include "../include/server.hpp"
+#include "../include/httpRequest.hpp"
 
 server::server(const uint16_t PORT) {
     memset(&this->hints, 0, sizeof(this->hints));
@@ -7,7 +8,7 @@ server::server(const uint16_t PORT) {
     this->hints.ai_flags = AI_PASSIVE;
 
     std::string portString = std::to_string(PORT);
-    // set the port to the param, 8080 to test for now
+    // set the port to the param
     int status = getaddrinfo(NULL, portString.c_str(), &this->hints, &this->serverInformation);
     if (status != 0) {
         std::cout << "addrinfo init fail." << std::endl;
@@ -45,7 +46,7 @@ void server::startAccepting() {
 
     char clientIp[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &clientAddr.sin_addr, clientIp, INET_ADDRSTRLEN);
-    std::cout << clientIp << std::endl;
+    std::cout << "----- Received data from: \n" << clientIp << std::endl;
 
     // const char* msg = "Hello, world!";
     // int len = strlen(msg);
@@ -54,13 +55,19 @@ void server::startAccepting() {
 
     char receivedText[MAX_RECV_BUFFER_SIZE];
 
-    int recvBytes = recv(clientSocket, receivedText, MAX_RECV_BUFFER_SIZE-1, 0);
+    ssize_t recvBytes = recv(clientSocket, receivedText, MAX_RECV_BUFFER_SIZE-1, 0);
     if (recvBytes == -1) {
         std::cout << "Error receiving data from client" << std::endl;
         exit(1);
     }
 
-    std::cout << receivedText << std::endl;
+    this->parseHTTPRequest(receivedText);
+
     std::cout << strlen(receivedText) << std::endl;
     
+}
+
+void server::parseHTTPRequest(char* receivedText) {
+    std::string recv(receivedText);
+    httpRequest req(recv);
 }

@@ -7,6 +7,8 @@
 #include <iostream>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <sstream>
+#include <vector>
 
 class server
 {
@@ -17,6 +19,8 @@ private:
     int serverSocket;
     struct addrinfo hints;
     struct addrinfo *serverInformation;
+
+    void parseHTTPRequest(char* recvText);
 
 public:
     server(const uint16_t PORT);
