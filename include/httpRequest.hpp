@@ -5,6 +5,12 @@
 #include <sstream>
 #include <map>
 
+enum RequestMethodType {
+    GET,
+    POST,
+    ERROR,
+};
+
 class httpRequest
 {
 private:
@@ -12,5 +18,8 @@ private:
     std::map<std::string, std::string> reqHeaders;
 public:
     httpRequest(const std::string req);
+    const std::string&      getRequestPath();
+    enum RequestMethodType getRequestMethod();
     ~httpRequest();
 };
+

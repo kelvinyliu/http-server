@@ -42,6 +42,20 @@ httpRequest::httpRequest(const std::string req) {
     std::cout << this->reqVersion << std::endl;
 }
 
+enum RequestMethodType httpRequest::getRequestMethod() {
+    if (this->reqMethod == "GET") {
+        return RequestMethodType::GET;
+    } else if (this->reqMethod == "POST") {
+        return RequestMethodType::POST;
+    }
+    // others not implemented yet, just error.
+    return RequestMethodType::ERROR;
+}
+
+const std::string& httpRequest::getRequestPath() {
+    return this->reqPath;
+}
+
 httpRequest::~httpRequest() {
 
 }
