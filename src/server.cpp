@@ -41,25 +41,29 @@ void server::initSocket() {
 
 void server::startAccepting() {
     // temp like this for now:
-    struct sockaddr_in clientAddr;
-    socklen_t clientSockLen = sizeof(clientAddr);
-    int clientSocket = accept(this->serverSocket, (sockaddr *)&clientAddr, &clientSockLen);
+    while (true) {
+        struct sockaddr_in clientAddr;
+        socklen_t clientSockLen = sizeof(clientAddr);
+        int clientSocket = accept(this->serverSocket, (sockaddr *)&clientAddr, &clientSockLen);
 
-    char clientIp[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &clientAddr.sin_addr, clientIp, INET_ADDRSTRLEN);
-    std::cout << "----- Received data from: \n" << clientIp << std::endl;
+        char clientIp[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, &clientAddr.sin_addr, clientIp, INET_ADDRSTRLEN);
+        std::cout << "----- Received data from: \n" << clientIp << std::endl;
 
-    char receivedText[MAX_RECV_BUFFER_SIZE];
+        char receivedText[MAX_RECV_BUFFER_SIZE];
 
-    ssize_t recvBytes = recv(clientSocket, receivedText, MAX_RECV_BUFFER_SIZE-1, 0);
-    if (recvBytes == -1) {
-        std::cout << "Error receiving data from client" << std::endl;
-        exit(1);
+        ssize_t recvBytes = recv(clientSocket, receivedText, MAX_RECV_BUFFER_SIZE-1, 0);
+        if (recvBytes == -1) {
+            std::cout << "Error receiving data from client" << std::endl;
+            exit(1);
+        }
+
+        this->parseHTTPRequest(receivedText, clientSocket);
+        // once parsing request is finished, finish up the socket.
+        close(clientSocket);
+
+        std::cout << strlen(receivedText) << std::endl;
     }
-
-    this->parseHTTPRequest(receivedText, clientSocket);
-
-    std::cout << strlen(receivedText) << std::endl;
     
 }
 
