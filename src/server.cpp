@@ -1,5 +1,6 @@
 #include "../include/server.hpp"
 #include "../include/httpRequest.hpp"
+#include <fstream>
 
 server::server(const uint16_t PORT) {
     memset(&this->hints, 0, sizeof(this->hints));
@@ -48,11 +49,6 @@ void server::startAccepting() {
     inet_ntop(AF_INET, &clientAddr.sin_addr, clientIp, INET_ADDRSTRLEN);
     std::cout << "----- Received data from: \n" << clientIp << std::endl;
 
-    // const char* msg = "Hello, world!";
-    // int len = strlen(msg);
-    // int bytesSent = 0;
-    // bytesSent = send(clientSocket, msg, len, 0);
-
     char receivedText[MAX_RECV_BUFFER_SIZE];
 
     ssize_t recvBytes = recv(clientSocket, receivedText, MAX_RECV_BUFFER_SIZE-1, 0);
@@ -61,13 +57,63 @@ void server::startAccepting() {
         exit(1);
     }
 
-    this->parseHTTPRequest(receivedText);
+    this->parseHTTPRequest(receivedText, clientSocket);
 
     std::cout << strlen(receivedText) << std::endl;
     
 }
 
-void server::parseHTTPRequest(char* receivedText) {
+void server::parseHTTPRequest(char* receivedText, int reqSocket) {
     std::string recv(receivedText);
     httpRequest req(recv);
+
+    enum RequestMethodType reqMethod = req.getRequestMethod();
+    std::string reqPath = req.getRequestPath();
+
+    /*
+        Handle serving server files,
+        the default '/' get should point to index.html in the base folder.
+
+        the base folder should be "htdocs", so any request path should be from that folder.
+
+        get method -> 
+        call serving method, pass reqpath -> 
+        check for existence of path ->
+        respond appropriately with correct headers and html content
+    */
+    if (reqMethod == RequestMethodType::GET) {
+        this->serveGetRequest(reqPath, reqSocket);
+    }
+}
+
+void server::serveGetRequest(const std::string& reqPath, int reqSocket) {
+    std::string filePath = "htdocs/";
+    // serve correct file, '/' is going to refer to index.html
+    if (reqPath == "/") {
+        filePath.append("index.html");
+    } else {
+        filePath.append(reqPath);
+    }
+
+    std::ifstream requestedFile(filePath, std::ios::binary);
+    if (!requestedFile.is_open()) {
+        // return an error page, for now just exit program and error
+        std::cout << filePath << std::endl;
+        std::cout << "Implement error page later." << std::endl;
+        exit(1);
+    }
+    std::ostringstream bodyStream;
+    bodyStream << requestedFile.rdbuf();
+    std::string body = bodyStream.str();
+
+    std::ostringstream responseStream;
+    responseStream << "HTTP/1.1 200 OK" << "\r\n";
+    responseStream << "Content-Length: " << body.size() << "\r\n";
+    responseStream << "Content-Type: text/html" << "\r\n";
+    responseStream << "\r\n";
+    responseStream << body;
+
+    std::string response = responseStream.str();
+    send(reqSocket, response.c_str(), response.size(), 0);
+
 }

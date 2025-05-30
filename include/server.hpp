@@ -20,7 +20,8 @@ private:
     struct addrinfo hints;
     struct addrinfo *serverInformation;
 
-    void parseHTTPRequest(char* recvText);
+    void parseHTTPRequest(char* recvText, int reqSocket);
+    void serveGetRequest(const std::string& reqPath, int reqSocket);
 
 public:
     server(const uint16_t PORT);
