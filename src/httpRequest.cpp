@@ -90,6 +90,10 @@ const std::map<std::string, std::string> httpRequest::getQueries() const {
     return this->reqQueries;
 }
 
+const std::map<std::string, std::string>& httpRequest::getRequestHeaders() const {
+    return this->reqHeaders;
+}
+
 httpRequest::~httpRequest() {
 
 }

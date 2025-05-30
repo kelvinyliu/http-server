@@ -24,6 +24,7 @@ public:
     httpRequest(const std::string req);
     const std::string&  getRequestPath() const;
     enum RequestMethodType  getRequestMethod() const;
+    const std::map<std::string, std::string>& getRequestHeaders() const;
     const std::map<std::string, std::string> getQueries() const;
     ~httpRequest();
 };
