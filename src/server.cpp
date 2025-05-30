@@ -1,4 +1,5 @@
 #include "../include/server.hpp"
+#include "../include/server_helper.hpp"
 #include "../include/httpRequest.hpp"
 #include <fstream>
 
@@ -110,8 +111,15 @@ void server::serveGetRequest(const std::string& reqPath, int reqSocket) {
     if (!requestedFile.is_open()) {
         // return an error page, for now just exit program and error
         std::cout << filePath << std::endl;
-        std::cout << "Implement error page later." << std::endl;
-        exit(1);
+        std::string notFound =
+            "HTTP/1.1 404 Not Found\r\n"
+            "Content-Type: text/html\r\n"
+            "Content-Length: 13\r\n"
+            "\r\n"
+            "404 Not Found";
+
+        send(reqSocket, notFound.c_str(), notFound.size(), 0);
+        return;
     }
     std::ostringstream bodyStream;
     bodyStream << requestedFile.rdbuf();
@@ -120,7 +128,7 @@ void server::serveGetRequest(const std::string& reqPath, int reqSocket) {
     std::ostringstream responseStream;
     responseStream << "HTTP/1.1 200 OK" << "\r\n";
     responseStream << "Content-Length: " << body.size() << "\r\n";
-    responseStream << "Content-Type: text/html" << "\r\n";
+    responseStream << "Content-Type: " << getMIMEType(filePath) << "\r\n";
     responseStream << "\r\n";
     responseStream << body;
 
