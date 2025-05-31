@@ -23,6 +23,7 @@ private:
 
     void parseHTTPRequest(char* recvText, int reqSocket);
     void serveGetRequest(const httpRequest& req, int reqSocket);
+    void serveHeadRequest(const httpRequest& req, int reqSocket);
     void serve404Page(int reqSocket);
 
 public:

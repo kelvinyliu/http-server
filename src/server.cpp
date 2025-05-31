@@ -113,11 +113,18 @@ void server::parseHTTPRequest(char* receivedText, int reqSocket) {
         return;
     }
 
-    if (reqMethod == RequestMethodType::GET) {
+    switch (reqMethod) {
+    case RequestMethodType::GET:
         this->serveGetRequest(req, reqSocket);
-    } else {
+        break;
+    case RequestMethodType::HEAD:
+        this->serveHeadRequest(req, reqSocket);
+        break;
+    
+    default:
         // serve 404 if not handled request method for now.
         this->serve404Page(reqSocket);
+        break;
     }
 }
 
@@ -146,16 +153,13 @@ void server::serveGetRequest(const httpRequest& req, int reqSocket) {
     std::string body = bodyStream.str();
 
     // date header
-    std::ostringstream dateHeader;
-    time_t now = std::time(NULL);
-    char dtNow[100];
-    std::strftime(dtNow, sizeof(dtNow), "%a, %d %b %Y %H:%M:%S GMT", std::gmtime(&now));
+    std::string dtNow = generateCurrentDateTime();
 
     std::ostringstream responseStream;
     responseStream << "HTTP/1.1 200 OK" << "\r\n";
     responseStream << "Content-Length: " << body.size() << "\r\n";
     responseStream << "Content-Type: " << getMIMEType(filePath) << "\r\n";
-    responseStream << "Date: " << dtNow << "\r\n";
+    responseStream << "Date: " << dtNow.c_str() << "\r\n";
     responseStream << "Connection: close" << "\r\n";
     responseStream << "\r\n";
     responseStream << body;
@@ -164,3 +168,41 @@ void server::serveGetRequest(const httpRequest& req, int reqSocket) {
     send(reqSocket, response.c_str(), response.size(), 0);
 }
 
+void server::serveHeadRequest(const httpRequest& req, int reqSocket) {
+    std::string filePath = "htdocs/";
+    const std::string reqPath = req.getRequestPath();
+
+    // serve correct file, '/' is going to refer to index.html
+    if (reqPath == "/") {
+        filePath.append("index.html");
+    } else {
+        filePath.append(reqPath);
+    }
+
+    std::map<std::string, std::string> queries = req.getQueries();
+
+    std::ifstream requestedFile(filePath, std::ios::binary);
+    if (!requestedFile.is_open()) {
+        // return an error page, for now just exit program and error
+        std::cout << filePath << std::endl;
+        this->serve404Page(reqSocket);
+        return;
+    }
+    std::ostringstream bodyStream;
+    bodyStream << requestedFile.rdbuf();
+    std::string body = bodyStream.str();
+
+    // date header
+    std::string dtNow = generateCurrentDateTime();
+
+    std::ostringstream responseStream;
+    responseStream << "HTTP/1.1 200 OK" << "\r\n";
+    responseStream << "Content-Length: " << body.size() << "\r\n";
+    responseStream << "Content-Type: " << getMIMEType(filePath) << "\r\n";
+    responseStream << "Date: " << dtNow.c_str() << "\r\n";
+    responseStream << "Connection: close" << "\r\n";
+    responseStream << "\r\n";
+
+    std::string response = responseStream.str();
+    send(reqSocket, response.c_str(), response.size(), 0);
+}
