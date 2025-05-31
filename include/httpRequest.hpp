@@ -7,6 +7,7 @@
 
 enum RequestMethodType {
     GET,
+    HEAD,
     POST,
     ERROR,
 };

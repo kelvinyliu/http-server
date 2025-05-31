@@ -47,6 +47,8 @@ httpRequest::httpRequest(const std::string req) {
 enum RequestMethodType httpRequest::getRequestMethod() const {
     if (this->reqMethod == "GET") {
         return RequestMethodType::GET;
+    } else if (this->reqMethod == "HEAD") {
+        return RequestMethodType::HEAD;
     } else if (this->reqMethod == "POST") {
         return RequestMethodType::POST;
     }
