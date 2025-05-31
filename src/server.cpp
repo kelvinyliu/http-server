@@ -2,6 +2,7 @@
 #include "../include/server_helper.hpp"
 #include "../include/httpRequest.hpp"
 #include <fstream>
+#include <ctime>
 
 server::server(const uint16_t PORT) {
     memset(&this->hints, 0, sizeof(this->hints));
@@ -80,6 +81,7 @@ void server::serve404Page(int reqSocket) {
         "HTTP/1.1 404 Not Found\r\n"
         "Content-Type: text/html\r\n"
         "Content-Length: 13\r\n"
+        "Connection: close\r\n"
         "\r\n"
         "404 Not Found";
 
@@ -113,6 +115,9 @@ void server::parseHTTPRequest(char* receivedText, int reqSocket) {
 
     if (reqMethod == RequestMethodType::GET) {
         this->serveGetRequest(req, reqSocket);
+    } else {
+        // serve 404 if not handled request method for now.
+        this->serve404Page(reqSocket);
     }
 }
 
@@ -140,10 +145,17 @@ void server::serveGetRequest(const httpRequest& req, int reqSocket) {
     bodyStream << requestedFile.rdbuf();
     std::string body = bodyStream.str();
 
+    // date header
+    std::ostringstream dateHeader;
+    time_t now = std::time(NULL);
+    char dtNow[100];
+    std::strftime(dtNow, sizeof(dtNow), "%a, %d %b %Y %H:%M:%S GMT", std::gmtime(&now));
+
     std::ostringstream responseStream;
     responseStream << "HTTP/1.1 200 OK" << "\r\n";
     responseStream << "Content-Length: " << body.size() << "\r\n";
     responseStream << "Content-Type: " << getMIMEType(filePath) << "\r\n";
+    responseStream << "Date: " << dtNow << "\r\n";
     responseStream << "Connection: close" << "\r\n";
     responseStream << "\r\n";
     responseStream << body;
