@@ -1,4 +1,6 @@
 #include "../include/server_helper.hpp"
+#include <ctime>
+#include <sstream>
 
 std::string getMIMEType(const std::string& fileName) {
     if (fileName.size() >= 5 && fileName.substr(fileName.size() - 5) == ".html") return "text/html";
@@ -24,4 +26,12 @@ std::string getMIMEType(const std::string& fileName) {
     if (fileName.size() >= 4 && fileName.substr(fileName.size() - 4) == ".bmp") return "image/bmp";
     if (fileName.size() >= 4 && fileName.substr(fileName.size() - 4) == ".webp") return "image/webp";
     return "application/octet-stream"; // default MIME type
+}
+
+std::string generateCurrentDateTime() {
+    time_t now = std::time(NULL);
+    char dtNow[100];
+    std::strftime(dtNow, sizeof(dtNow), "%a, %d %b %Y %H:%M:%S GMT", std::gmtime(&now));
+
+    return dtNow;
 }
