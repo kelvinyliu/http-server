@@ -11,6 +11,12 @@ enum RequestMethodType {
     ERROR,
 };
 
+enum RequestHTTPVersion {
+    HTTP1_1,
+    HTTP1_0,
+    HTTP_UNKNOWN
+};
+
 class httpRequest
 {
 private:
@@ -26,6 +32,7 @@ public:
     enum RequestMethodType  getRequestMethod() const;
     const std::map<std::string, std::string>& getRequestHeaders() const;
     const std::map<std::string, std::string> getQueries() const;
+    enum RequestHTTPVersion getRequestVersion() const;
     ~httpRequest();
 };
 

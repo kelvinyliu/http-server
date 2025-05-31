@@ -108,7 +108,7 @@ void server::parseHTTPRequest(char* receivedText, int reqSocket) {
         respond appropriately with correct headers and html content
     */
 
-    if (reqHeaders.find("Host") == reqHeaders.end()) {
+    if (req.getRequestVersion() == RequestHTTPVersion::HTTP1_1 && reqHeaders.find("Host") == reqHeaders.end()) {
         this->serve404Page(reqSocket);
         return;
     }

@@ -94,6 +94,18 @@ const std::map<std::string, std::string>& httpRequest::getRequestHeaders() const
     return this->reqHeaders;
 }
 
+RequestHTTPVersion httpRequest::getRequestVersion() const {
+
+    if (this->reqVersion == "HTTP/1.1") {
+        return RequestHTTPVersion::HTTP1_1;
+    } else if (this->reqVersion == "HTTP/1.0") {
+        return RequestHTTPVersion::HTTP1_0;
+    } else {
+        return RequestHTTPVersion::HTTP_UNKNOWN;
+    }
+
+}
+
 httpRequest::~httpRequest() {
 
 }
